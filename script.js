@@ -1,21 +1,10 @@
-
 let context = [];
 let oscillators = [];
 let gains = [];
 let oscillatorsParam = [];
-
 let amountOscillators = 0;
-
+//the div with all the oscillators
 const oscillatorsDiv = document.getElementById('oscillators');
-
-
-
-
-
-
-
-
-//arrayOfObjects, empty
 
 //function to create all we need for a new oscillator. Global variable amountOscillators keep track of how many we create
 function createNewOscillator(id, freq, fadeOutTime, interval) {
@@ -31,8 +20,7 @@ function createNewOscillator(id, freq, fadeOutTime, interval) {
         interval: interval
     });
 }
-
-
+//function to start sound
 function start(id) {
     oscillators[id] = context[id].createOscillator();
     oscillators[id].type = "sine";
@@ -43,68 +31,54 @@ function start(id) {
     gains[id].connect(context[id].destination);
     oscillators[id].start();
 }
-
-
+//function to stop sound
 function stop(id) {
-    // Use setValueAtTime for a more consistent fade-out across browsers
     gains[id].gain.setValueAtTime(gains[id].gain.value, context[id].currentTime);
     gains[id].gain.linearRampToValueAtTime(0.00001, context[id].currentTime + oscillatorsParam[id].fadeOutTime);
-
     // Stop the oscillator after the fade-out duration
     oscillators[id].stop(context[id].currentTime + oscillatorsParam[id].fadeOutTime);
 }
 
-
-
-
-
-
-
-
 // Object to store interval IDs
 const intervalIds = {};
-
+//function that starts then stop a given sound, creating a beep
 const beep = (id) => {
     start(id);
     stop(id);
 }
-
+//articulate beeps through time
 const beepTime = (id) => {
     // Clear the previous interval if it exists
     if (intervalIds[id]) {
         clearInterval(intervalIds[id]);
     }
-
+    //turn the interval into millisecondes
     let interval = oscillatorsParam[id].interval * 1000;
-
     // Set up a new interval and save the interval ID
     intervalIds[id] = setInterval(() => beep(id), interval);
 };
-
+//end a beep
 const destroyBeep = (id) => {
     // Clear the interval associated with the given id
     if (intervalIds[id]) {
         clearInterval(intervalIds[id]);
-        // Optionally, you can also stop the beep immediately
         stop(id);
     }
 };
-
-
+//function to create the ui
 function createNewOscillatorDiv(id, freq, fadeOutTime, interval) {
     const gradProcent = computeProcentGradient(fadeOutTime, interval)
     console.log(gradProcent);
     const $rotationStyle = `"
     animation: rotateGradient ${interval}s linear infinite; 
-    background: conic-gradient(from 180deg, black 0%, red ${gradProcent}% 100%);
+    background: conic-gradient(from 180deg, black 0%, white ${gradProcent}% 100%);
     "`
-
     let newOscillatorDiv = `
         <div id="osc-${id}"class="oscillator-div">
             <form id="update-oscillator">
-                <label>Frequency: <input id="freq-${id}" type="number" min="110" max="440" required value="${freq}"></label>
-                <label>Fade-Out: <input id="fade-out-${id}" type="number" min="0.05" max="2" step="0.01" required value="${fadeOutTime}"></label>
-                <label>Interval: <input id="interval-${id}" type="number" min="0.1" max="3" step="0.01" required value="${interval}"></label>
+                <label>Frequency: <input id="freq-${id}" type="number" min="55" max="880" required value="${freq}"></label>
+                <label>Fade-Out: <input id="fade-out-${id}" type="number" min="0.05" max="16" step="0.01" required value="${fadeOutTime}"></label>
+                <label>Interval: <input id="interval-${id}" type="number" min="0.1" max="16" step="0.01" required value="${interval}"></label>
                 <button onclick="updateOscillator(event, ${id})">update</button>
                 <button onclick="deleteOscillator(event, ${id})">delete</button>
             </form>
@@ -116,15 +90,12 @@ function createNewOscillatorDiv(id, freq, fadeOutTime, interval) {
     `;
     return newOscillatorDiv;
 }
-
-
-function computeProcentGradient(fadeOutTime, interval) {
+//just to return the way we should render gradients
+const computeProcentGradient = (fadeOutTime, interval) => {
     let result = (fadeOutTime / interval) * 100
     return result;
 }
-
-
-
+//when the user click to create a new oscillator
 document.getElementById('create-oscillator').addEventListener('submit', function(event) {
     // Prevent the default form submission
     event.preventDefault();
@@ -132,13 +103,12 @@ document.getElementById('create-oscillator').addEventListener('submit', function
     const freqValue = parseFloat(document.getElementById('freq').value);
     const fadeOutValue = parseFloat(document.getElementById('fade-out').value);
     const intervalValue = parseFloat(document.getElementById('interval').value);
-    // Call your function here passing the retrieved values
     createNewOscillator(amountOscillators, freqValue, fadeOutValue, intervalValue);
     beepTime(amountOscillators);
     oscillatorsDiv.insertAdjacentHTML('beforeend', createNewOscillatorDiv(amountOscillators, freqValue, fadeOutValue, intervalValue));
     amountOscillators ++;
 });
-
+//when the user click to delete an oscillator
 function deleteOscillator(event, id) {
     // Prevent the default behavior of the button click
     event.preventDefault();
@@ -146,7 +116,7 @@ function deleteOscillator(event, id) {
     divToRemove.remove();
     destroyBeep(id);
 }
-
+//when the user click to update an oscillator
 function updateOscillator(event, id) {
     // Prevent the default behavior of the button click
     event.preventDefault();
@@ -154,8 +124,7 @@ function updateOscillator(event, id) {
     const freqValue = parseFloat(document.getElementById(`freq-${id}`).value);
     const fadeOutValue = parseFloat(document.getElementById(`fade-out-${id}`).value);
     const intervalValue = parseFloat(document.getElementById(`interval-${id}`).value);
-    
-    
+
     destroyBeep(id);
 
     oscillatorsParam[id].freq = freqValue;
@@ -166,6 +135,25 @@ function updateOscillator(event, id) {
     divToRemove.insertAdjacentHTML('afterend', createNewOscillatorDiv(id, freqValue, fadeOutValue, intervalValue));
     divToRemove.remove();
     
-    
     beepTime(id);
+}
+
+function initializeFun(freqValue, fadeOutValue, intervalValue) {
+    createNewOscillator(amountOscillators, freqValue, fadeOutValue, intervalValue);
+    beepTime(amountOscillators);
+    oscillatorsDiv.insertAdjacentHTML('beforeend', createNewOscillatorDiv(amountOscillators, freqValue, fadeOutValue, intervalValue));
+    amountOscillators ++;
+}
+
+function somethingNice(event) {
+    event.preventDefault();
+    initializeFun(55, 4.1, 4.2);
+    initializeFun(110, 4.12, 4.25);
+    initializeFun(82, 4.05, 4.1);
+    initializeFun(65, 4.1, 4.3);
+    initializeFun(220, 2.16, 2.2);
+    initializeFun(261, 4.12, 4.27);
+    initializeFun(440, 0.1, 3.6);
+    initializeFun(880, 0.1, 8.3);
+    console.log("fun");
 }
