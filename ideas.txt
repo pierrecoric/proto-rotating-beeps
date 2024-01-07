@@ -1,0 +1,14 @@
+gradient stops = fadeout
+color = frequency
+
+update: create where the id is
+
+
+background: conic-gradient(red 0% 10%, black 10%, red 80% 100%);
+background: conic-gradient(red 0% a%, black a%, red b% 100%);
+
+
+interval 360 degrées divisé en secondes
+
+combien de pourcent de l'interval est le fade out time.
+
