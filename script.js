@@ -19,6 +19,7 @@ function createNewOscillator(id, freq, fadeOutTime, interval) {
         fadeOutTime: fadeOutTime,
         interval: interval
     });
+    beep(id);
 }
 //function to start sound
 function start(id) {
@@ -76,9 +77,9 @@ function createNewOscillatorDiv(id, freq, fadeOutTime, interval) {
     let newOscillatorDiv = `
         <div id="osc-${id}"class="oscillator-div">
             <form id="update-oscillator">
-                <label>Frequency: <input id="freq-${id}" type="number" min="55" max="880" required value="${freq}"></label>
-                <label>Fade-Out: <input id="fade-out-${id}" type="number" min="0.05" max="16" step="0.01" required value="${fadeOutTime}"></label>
-                <label>Interval: <input id="interval-${id}" type="number" min="0.1" max="16" step="0.01" required value="${interval}"></label>
+                <label>Frequency: <input id="freq-${id}" type="range" min="55" max="880" required value="${freq}" onchange="updateOscillator(event, ${id})">${freq}Hz</label>
+                <label>Fade-Out: <input id="fade-out-${id}" type="range" min="0.05" max=${interval} step="0.01" required value="${fadeOutTime}" onchange="updateOscillator(event, ${id})">${fadeOutTime}sec</label>
+                <label>Interval: <input id="interval-${id}" type="range" min="0.1" max="16" step="0.01" required value="${interval}" onchange="updateOscillator(event, ${id})">${interval}sec</label>
                 <button onclick="updateOscillator(event, ${id})">update</button>
                 <button onclick="deleteOscillator(event, ${id})">delete</button>
             </form>
@@ -107,6 +108,7 @@ document.getElementById('create-oscillator').addEventListener('submit', function
     beepTime(amountOscillators);
     oscillatorsDiv.insertAdjacentHTML('beforeend', createNewOscillatorDiv(amountOscillators, freqValue, fadeOutValue, intervalValue));
     amountOscillators ++;
+
 });
 //when the user click to delete an oscillator
 function deleteOscillator(event, id) {
